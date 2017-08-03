@@ -112,24 +112,29 @@ contract Curve is Ownable {
         uint256 n = C * P;
         uint256 a = 0;
         uint256 i = 0;
-        while(n != 0) {
+        uint256 j = x;
+        while(true) {
 
-            // Positive term
-            n *= (x - i) * N;
-            i += 1;
-            n /= i;
-            n /= D;
-            a += n;
+          // Positive term
+          n *= j;
+          n /= i;
+          n *= N;
+          n /= D;
+          if(n == 0) break;
+          a += n;
+          i += 1;
+          j -= 1;
 
-            // Exit if n == 0
-            if(n == 0) break;
+          // Negative term
+          n *= j;
+          n /= i;
+          n *= N;
+          n /= D;
+          if(n == 0) break;
+          a -= n;
+          i += 1;
+          j -= 1;
 
-            // Negative term
-            n *= (x - i) * N;
-            i += 1;
-            n /= i;
-            n /= D;
-            a -= n;
         }
         return a / P;
     }
