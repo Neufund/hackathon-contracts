@@ -10,6 +10,11 @@ contract ExampleRoles {
 
 contract Example is AccessControlled, ExampleRoles {
 
+    function Example(IAccessPolicy policy)
+        AccessControlled(policy)
+    {
+    }
+
     function someFunction()
         public
         only(ROLE_EXAMPLE)
