@@ -1,11 +1,10 @@
 pragma solidity ^0.4.11;
 
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
+import './AccessControl/AccessControlled.sol';
+import './Roles.sol';
 import './NeumarkController.sol';
 
-contract Curve is Ownable {
-
-    // TODO: Fractional Euros and Fractional Neumarks
+contract Curve is AccessControlled, Roles {
 
     NeumarkController public NEUMARK_CONTROLLER;
 
@@ -21,74 +20,41 @@ contract Curve is Ownable {
         _;
     }
 
-    function Curve(NeumarkController neumarkController)
-        Ownable()
+    function Curve(
+        IAccessPolicy accessPolicy,
+        NeumarkController neumarkController
+    )
+        AccessControlled(accessPolicy)
     {
-        totalEuroUlps = 0;
         NEUMARK_CONTROLLER = neumarkController;
+        totalEuroUlps = 0;
     }
 
     // issues to msg.sender, further neumarks distribution happens there
     function issue(uint256 euroUlps)
-        //onlyOwner()
+        only(ROLE_NEUMARK_ISSUER)
         public
-        returns (uint256)
-    {
-        return issueTo(euroUlps, msg.sender);
-    }
-
-    function issueTo(uint256 euroUlps, address beneficiary)
-        //onlyOwner()
-        public // I do not see any case where this function is public
         returns (uint256)
     {
         require(totalEuroUlps + euroUlps >= totalEuroUlps);
         uint256 neumarkUlps = incremental(euroUlps);
         totalEuroUlps = totalEuroUlps + euroUlps;
-        assert(NEUMARK_CONTROLLER.generateTokens(beneficiary, neumarkUlps));
-        NeumarksIssued(beneficiary, euroUlps, neumarkUlps);
+        assert(NEUMARK_CONTROLLER.generateTokens(msg.sender, neumarkUlps));
+        NeumarksIssued(msg.sender, euroUlps, neumarkUlps);
         return neumarkUlps;
     }
 
-    function burnNeumarkFrom(uint256 neumarkUlps, address beneficiary)
-        // @remco I do not see use case where we burn someone's neumark
-        //onlyOwner()
+    function burn(uint256 neumarkUlps)
         public
         returns (uint256)
     {
-        uint256 euroUlps = rewindInverse(neumarkUlps);
-        burn(euroUlps, neumarkUlps, beneficiary);
-        return euroUlps;
-    }
+        uint256 euroUlps = decrementalInverse(neumarkUlps);
 
-    function burnNeumark(uint256 neumarkUlps)
-        // @remco I do not see use case where we burn someone's neumark
-        //onlyOwner()
-        public
-        returns (uint256)
-    {
-        return burnNeumarkFrom(neumarkUlps, msg.sender);
-    }
-
-    function burn(uint256 euroUlps, uint256 neumarkUlps, address beneficiary)
-        //onlyOwner()
-        //@remco - this should be internal function, i do not see an use case for any client to call it
-        public
-        // TODO: checkInverse(euroUlps, neumarkUlps)
-        // TODO: Client side code
-        // TODO: Solve race condition?
-    {
         totalEuroUlps -= euroUlps;
         assert(NEUMARK_CONTROLLER.destroyTokens(beneficiary, neumarkUlps));
-        NeumarksBurned(beneficiary, euroUlps, neumarkUlps);
-    }
 
-    function cumulative(uint256 euroUlps)
-        public
-        constant
-        returns (uint256)
-    {
-        return curve(euroUlps);
+        NeumarksBurned(beneficiary, euroUlps, neumarkUlps);
+        return euroUlps;
     }
 
     function incremental(uint256 euroUlps)
@@ -103,7 +69,8 @@ contract Curve is Ownable {
         return to - from;
     }
 
-    function rewind(uint256 euroUlps)
+    function decremental(uint256 euroUlps)
+        public
         constant
         returns (uint256)
     {
@@ -114,7 +81,8 @@ contract Curve is Ownable {
         return to - from;
     }
 
-    function rewindInverse(uint256 neumarkUlps)
+    function decrementalInverse(uint256 neumarkUlps)
+        public
         constant
         returns (uint256)
     {
@@ -124,10 +92,10 @@ contract Curve is Ownable {
         uint256 to = cumulative(totalEuroUlps);
         require(to >= neumarkUlps);
         uint256 fromNmk = to - neumarkUlps;
-        uint256 fromEur = inverse(fromNmk, 0, totalEuroUlps);
+        uint256 fromEur = cumulativeInverse(fromNmk, 0, totalEuroUlps);
         assert(totalEuroUlps >= fromEur);
         uint256 euros = totalEuroUlps - fromEur;
-        // TODO: Inverse is not exact!
+        // TODO: Inverse is not necesarily exact!
         // assert(rewind(euros) == neumarkUlps);
         return euros;
     }
@@ -143,7 +111,7 @@ contract Curve is Ownable {
     // CAP  4055
     // LIM  10686
     // ≥    258
-    function curve(uint256 euroUlps)
+    function cumulative(uint256 euroUlps)
         public
         constant
         returns(uint256)
@@ -193,18 +161,19 @@ contract Curve is Ownable {
         return a;
     }
 
-    function inverse(uint256 neumarkUlps, uint256 min, uint256 max)
+    function cumulativeInverse(uint256 neumarkUlps, uint256 min, uint256 max)
+        public
         constant
         returns (uint256)
     {
         require(max >= min);
-        require(curve(min) <= neumarkUlps);
-        require(curve(max) >= neumarkUlps);
+        require(cumulative(min) <= neumarkUlps);
+        require(cumulative(max) >= neumarkUlps);
 
         // Binary search
         while (max > min) {
             uint256 mid = (max + min + 1) / 2;
-            uint256 val = curve(mid);
+            uint256 val = cumulative(mid);
             if(val == neumarkUlps) {
                 return mid;
             }
@@ -217,17 +186,17 @@ contract Curve is Ownable {
         assert(max == min);
 
         // Did we find an exact solution?
-        if(curve(max) == neumarkUlps) {
+        if(cumulative(max) == neumarkUlps) {
             return max;
         }
 
         // NOTE: It is possible that there is no inverse
-        // for example curve(0) = 0 and curve(1) = 6, so
-        // there is no value y such that curve(y) = 5.
-        // In this case we return a value such that curve(y) < x
-        // and curve(y + 1) > x.
-        assert(curve(max) < neumarkUlps);
-        assert(curve(max + 1) > neumarkUlps);
+        // for example cumulative(0) = 0 and cumulative(1) = 6, so
+        // there is no value y such that cumulative(y) = 5.
+        // In this case we return a value such that cumulative(y) < x
+        // and cumulative(y + 1) > x.
+        assert(cumulative(max) < neumarkUlps);
+        assert(cumulative(max + 1) > neumarkUlps);
         return max;
     }
 }
