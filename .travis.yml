@@ -7,6 +7,14 @@ node_js:
   - "7"
 cache: yarn
 install:
+  - curl -L "https://github.com/ethereum/solidity/releases/download/v0.4.15/solc-static-linux" > ./solc
+  - echo "5117c0cf8b49d41c56da01506114b0e181f19faf40ef7927ebc76368c1b6a315001ec1d2ba1b17413b3f7b6aa589186b  ./solc" | sha384sum -c
+  - chmod +x ./solc
+  - mkdir -p ~/.local/bin
+  - mv ./solc ~/.local/bin
+  - set PATH "~/.local/bin:$PATH"
+  - export PATH
+  - solc --version
   - yarn
 script:
   - yarn lint

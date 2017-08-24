@@ -9,8 +9,6 @@ const Curve = artifacts.require("Curve");
 const TestCommitment = artifacts.require("TestCommitment");
 const WhitelistedCommitment = artifacts.require("WhitelistedCommitment");
 
-const BigNumber = web3.BigNumber;
-
 export let neumark;
 export let neumarkController;
 export let etherToken;
@@ -18,7 +16,7 @@ export let lockedAccount;
 export let curve;
 export let commitment;
 export let feePool;
-export let operatorWallet = "0x55d7d863a155f75c5139e20dcbda8d0075ba2a1c";
+export const operatorWallet = "0x55d7d863a155f75c5139e20dcbda8d0075ba2a1c";
 
 export const days = 24 * 60 * 60;
 export const months = 30 * 24 * 60 * 60;

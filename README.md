@@ -1,5 +1,10 @@
 # ICO contracts
 
+This project requires `solc` version 0.4.15 to be installed and available. You can download `solc` for your platform [here][solc].
+
+[solc]: https://github.com/ethereum/solidity/releases/tag/v0.4.15
+
+
 ## Developing
 ```
 yarn testrpc # run test net

@@ -30,7 +30,7 @@
     "mocha": "^3.3.0",
     "moment": "^2.18.1",
     "swarm-js": "^0.1.35",
-    "truffle": "3.4.9",
+    "truffle": "neufund/truffle#neufund",
     "web3": "0.20.1",
     "zeppelin-solidity": "^1.2.0"
   },
@@ -40,8 +40,8 @@
     "lint": "yarn format",
     "lint:fix": "yarn format:fix",
     "testrpc": "testrpc --deterministic",
-    "test": "truffle test",
-    "test:coverage": "solidity-coverage && codecov",
+    "test": "truffle compile && truffle test",
+    "test:coverage": "truffle compile && solidity-coverage && codecov",
     "build": "truffle compile",
     "deploy": "truffle migrate --reset --compile-all"
   },

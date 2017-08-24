@@ -8,18 +8,19 @@ const NeumarkFactory = artifacts.require("./NeumarkFactory.sol");
 const Neumark = artifacts.require("./Neumark.sol");
 const NeumarkController = artifacts.require("./NeumarkController.sol");
 
-const BigNumber = web3.BigNumber;
-const EUR_DECIMALS = new BigNumber(10).toPower(18);
-const NMK_DECIMALS = new BigNumber(10).toPower(18);
-
 contract("Curve", accounts => {
   let curve;
   let curveGas;
   let neumark;
   let factory;
   let controller;
+  let EUR_DECIMALS;
+  let NMK_DECIMALS;
 
   beforeEach(async () => {
+    EUR_DECIMALS = new BigNumber(10).toPower(18);
+    NMK_DECIMALS = new BigNumber(10).toPower(18);
+
     factory = await NeumarkFactory.new();
     neumark = await Neumark.new(factory.address);
     controller = await NeumarkController.new(neumark.address);
@@ -216,6 +217,7 @@ contract("Curve", accounts => {
     // issue for 100 wei
     tx = await curve.issue(new BigNumber(100).mul(eurRate));
     const p2NMK = eventValue(tx, "NeumarksIssued", "neumarks");
+
     expect(totNMK).to.be.bignumber.equal(p1NMK.plus(p2NMK));
   });
 });
