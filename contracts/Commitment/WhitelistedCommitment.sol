@@ -67,7 +67,7 @@ contract WhitelistedCommitment is AccessRoles, CommitmentBase {
     {
         require(currentTime()<startDate);
         rollbackCurve();
-        selfdestruct(address(0));
+        selfdestruct(address(msg.sender));
     }
 
     function rollbackCurve()
