@@ -14,6 +14,7 @@ contract NeumarkIssuanceCurve {
         return to - from;
     }
 
+    /// @dev The result is rounded down.
     function incrementalInverse(uint256 totalEuroUlps, uint256 neumarkUlps)
         public
         constant
@@ -62,6 +63,7 @@ contract NeumarkIssuanceCurve {
         return sum;
     }
 
+    /// @dev The result is rounded up.
     function cumulativeInverse(uint256 neumarkUlps, uint256 min, uint256 max)
         public
         constant
@@ -98,6 +100,12 @@ contract NeumarkIssuanceCurve {
         // and curve(y + 1) > x.
         assert(cumulative(max) < neumarkUlps);
         assert(cumulative(max + 1) > neumarkUlps);
-        return max;
+
+        // When there is no inverse, we round up.
+        // This has the effect of reversing the curve less when
+        // burning Neumarks. This ensures that Neumarks can always
+        // be burned. It also ensure that the total supply of Neumarks
+        // remains below the cap.
+        return max + 1;
     }
 }
