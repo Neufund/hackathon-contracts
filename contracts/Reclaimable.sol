@@ -13,17 +13,19 @@ contract Reclaimable is AccessControlled, AccessRoles {
         only(ROLE_RECLAIMER)
         returns (bool)
     {
-        uint256 balance;
-        bool success;
+        uint256 balance = token == RECLAIM_ETHER ?
+            this.balance : token.balanceOf(this);
+        return reclaimAmount(token, balance);
+    }
+
+    function reclaimAmount(IBasicToken token, uint256 amount)
+        public
+        only(ROLE_RECLAIMER)
+        returns (bool)
+    {
         address receiver = msg.sender;
-        if(token == RECLAIM_ETHER) {
-            balance = this.balance;
-            success = receiver.send(balance);
-            return success;
-        } else {
-            balance = token.balanceOf(this);
-            success = token.transfer(receiver, balance);
-            return success;
-        }
+        bool success = token == RECLAIM_ETHER ?
+            receiver.send(amount) : token.transfer(receiver, amount);
+        return success;
     }
 }
