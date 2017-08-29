@@ -160,7 +160,9 @@ contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErro
         // only from neumarks
         require(_token == address(neumark));
         // this will check if allowance was made and if _amount is enough to unlock
-        unlockFor(from);
+        require(unlockFor(from) == Status.SUCCESS);
+        // we assume external call so return value will be lost to clients
+        // that's why we throw above
         return true;
     }
 
@@ -289,9 +291,13 @@ contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErro
         public
         returns (bool)
     {
-        // This contract holds the asset token
-        require(token != assetToken);
-        return Reclaimable.reclaim(token);
+        // This contract holds the asset token and manages totalLockedAmount balance
+        // anything above that can be reclaimed
+        uint256 amount = token.balanceOf(this);
+        if (token == assetToken) {
+            amount -= totalLockedAmount;
+        }
+        return Reclaimable.reclaimAmount(token, amount);
     }
 
 }
