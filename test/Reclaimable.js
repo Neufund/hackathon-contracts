@@ -17,10 +17,11 @@ contract("Reclaimable", ([deployer, reclaimer, other]) => {
     reclaimable = await TestReclaimable.new(accessPolicy);
     RECLAIM_ETHER = await reclaimable.RECLAIM_ETHER();
   });
+
   it("should reclaim ether", async () => {
     const amount = web3.toWei(1, "ether");
 
-    await forceEther(reclaimable.address, amount);
+    await forceEther(reclaimable.address, amount, deployer);
     const reclaimerBefore = await web3.eth.getBalance(reclaimer);
     const before = await web3.eth.getBalance(reclaimable.address);
     await reclaimable.reclaim(RECLAIM_ETHER, { from: reclaimer });
@@ -33,6 +34,7 @@ contract("Reclaimable", ([deployer, reclaimer, other]) => {
     // The reclaimer also pays for gas.
     expect(reclaimerAfter.comparedTo(reclaimerBefore)).to.equal(1);
   });
+
   it("should reclaim tokens", async () => {
     const amount = web3.toWei(1, "ether");
     const token = await TestToken.new(amount);
@@ -47,9 +49,10 @@ contract("Reclaimable", ([deployer, reclaimer, other]) => {
     expect(after).to.be.bignumber.zero;
     expect(reclaimerAfter.sub(reclaimerBefore)).to.be.bignumber.equal(amount);
   });
+
   it("should only allow ROLE_RECLAIMER to reclaim", async () => {
     const amount = web3.toWei(1, "ether");
-    await forceEther(reclaimable.address, amount);
+    await forceEther(reclaimable.address, amount, deployer);
     await expectThrow(reclaimable.reclaim(RECLAIM_ETHER, { from: other }));
     await expectThrow(reclaimable.reclaim(RECLAIM_ETHER, { from: deployer }));
     await reclaimable.reclaim(RECLAIM_ETHER, { from: reclaimer });
