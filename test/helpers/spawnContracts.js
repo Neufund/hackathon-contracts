@@ -26,15 +26,22 @@ export const days = 24 * 60 * 60;
 export const months = 30 * 24 * 60 * 60;
 export const ether = wei => new BigNumber(wei).mul(10 ** 18);
 
+export async function spawnAccessControl() {
+  accessControl = await RoleBasedAccessControl.new();
+  accessRoles = await AccessRoles.new();
+}
+
+export async function spawnEtherToken() {
+  await spawnAccessControl();
+  etherToken = await EtherToken.new(accessControl.address);
+}
+
 export async function spawnLockedAccount(
   lockAdminAccount,
   unlockDateMonths,
   unlockPenalty
 ) {
-  accessControl = await RoleBasedAccessControl.new();
-  accessRoles = await AccessRoles.new();
-  etherToken = await EtherToken.new(accessControl.address);
-  // console.log(`\tEtherToken took ${gasCost(etherToken)}.`);
+  await spawnEtherToken();
   neumark = await Neumark.new(accessControl.address);
   lockedAccount = await LockedAccount.new(
     accessControl.address,
