@@ -20,6 +20,9 @@ const LockState = {
   ReleaseAll: 4
 };
 
+// this low gas price is forced by code coverage
+const gasPrice = new web3.BigNumber(0x01);
+
 contract("LockedAccount", ([_, admin, investor, investor2]) => {
   let startTimestamp;
 
@@ -288,7 +291,6 @@ contract("LockedAccount", ([_, admin, investor, investor2]) => {
 
   async function withdrawAsset(investorAddress, amount) {
     const initalBalance = await web3.eth.getBalance(investorAddress);
-    const gasPrice = chain.ether(0.000000001);
     const tx = await chain.etherToken.withdraw(amount, {
       from: investorAddress,
       gasPrice
@@ -613,7 +615,6 @@ contract("LockedAccount", ([_, admin, investor, investor2]) => {
     const reclaimEther = await chain.lockedAccount.RECLAIM_ETHER();
     await allowToReclaim(admin);
     const adminEthBalance = await web3.eth.getBalance(admin);
-    const gasPrice = chain.ether(0.000000001);
     const tx = await chain.lockedAccount.reclaim(reclaimEther, {
       from: admin,
       gasPrice

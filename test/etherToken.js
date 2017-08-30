@@ -3,6 +3,9 @@ import * as chain from "./helpers/spawnContracts";
 import { TriState } from "./helpers/triState";
 import forceEther from "./helpers/forceEther";
 
+// this low gas price is forced by code coverage
+const gasPrice = new web3.BigNumber(0x01);
+
 contract("EtherToken", async ([_, reclaimer, investor1, investor2]) => {
   beforeEach(async () => {
     await chain.spawnEtherToken();
@@ -28,7 +31,6 @@ contract("EtherToken", async ([_, reclaimer, investor1, investor2]) => {
     const reclaimEther = await chain.etherToken.RECLAIM_ETHER();
     await allowToReclaim(reclaimer);
     const reclaimerEthBalance = await web3.eth.getBalance(reclaimer);
-    const gasPrice = chain.ether(0.000000001);
     const tx = await chain.etherToken.reclaim(reclaimEther, {
       from: reclaimer,
       gasPrice
