@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { gasCost, prettyPrintGasCost } from "./helpers/gasUtils";
+import { prettyPrintGasCost } from "./helpers/gasUtils";
 import { eventValue } from "./helpers/events";
 import { TriState } from "./helpers/triState";
 
@@ -55,7 +55,6 @@ contract("Neumark", accounts => {
 
   it("should deploy", async () => {
     prettyPrintGasCost("Neumark deploy", neumark);
-    expect(neumark).to.respectGasLimit(2608977);
   });
   it("should have name Neumark, symbol NMK and 18 decimals", async () => {
     assert.equal(await neumark.name.call(), "Neumark");
@@ -75,7 +74,6 @@ contract("Neumark", accounts => {
       from: accounts[1]
     }); // TODO check result
     prettyPrintGasCost("Issue", r1);
-    expect(r1).to.respectGasLimit(194056);
     assert.equal(
       (await neumark.totalEuroUlps.call()).div(NMK_DECIMALS).floor().valueOf(),
       100
@@ -96,7 +94,6 @@ contract("Neumark", accounts => {
       from: accounts[2]
     });
     prettyPrintGasCost("Issue", r2);
-    expect(r2).to.respectGasLimit(104256);
     assert.equal(
       (await neumark.totalEuroUlps.call()).div(NMK_DECIMALS).floor().valueOf(),
       1000
@@ -119,7 +116,6 @@ contract("Neumark", accounts => {
     const euroUlps = EUR_DECIMALS.mul(1000000);
     const r = await neumark.issueForEuro(euroUlps, { from: accounts[1] });
     prettyPrintGasCost("Issue", r);
-    expect(r).to.respectGasLimit(194266);
     const neumarkUlps = await neumark.balanceOf.call(accounts[1]);
     const neumarks = neumarkUlps.div(NMK_DECIMALS).floor().valueOf();
 
@@ -128,7 +124,6 @@ contract("Neumark", accounts => {
     const toBurnUlps = NMK_DECIMALS.mul(toBurn);
     const burned = await neumark.burnNeumark(toBurnUlps, { from: accounts[1] });
     prettyPrintGasCost("Burn", burned);
-    expect(burned).to.respectGasLimit(114498);
     assert.equal(
       (await neumark.balanceOf.call(accounts[1]))
         .div(NMK_DECIMALS)

@@ -1,9 +1,8 @@
 import { expect } from "chai";
-import { gasCost, prettyPrintGasCost } from "./helpers/gasUtils";
+import moment from "moment";
+import { prettyPrintGasCost } from "./helpers/gasUtils";
 import { latestTimestamp } from "./helpers/latestTime";
 import increaseTime from "./helpers/increaseTime";
-import moment from "moment";
-import expectThrow from "./helpers/expectThrow";
 
 const SnapshotTest = artifacts.require("./test/SnapshotTest.sol");
 
@@ -43,14 +42,12 @@ contract("Snapshot", () => {
   it("should create a snapshot", async () => {
     const r = await snapshotTest.createSnapshot();
     prettyPrintGasCost("createSnapshot", r);
-    expect(r).to.respectGasLimit(22869);
   });
 
   it("should set a new value", async () => {
     const r = await snapshotTest.setValue(1234);
 
     prettyPrintGasCost("Setting new value should of ", r);
-    expect(r).to.be.respectGasLimit(102855);
 
     assert.equal(1234, await snapshotTest.getValue.call(12));
     assert.isTrue(await snapshotTest.hasValue.call());
@@ -61,7 +58,6 @@ contract("Snapshot", () => {
 
     const r = await snapshotTest.setValue(12345);
     prettyPrintGasCost("Resetting new value", r);
-    expect(r).to.respectGasLimit(27616);
 
     assert.equal(12345, await snapshotTest.getValue.call(12));
     assert.isTrue(await snapshotTest.hasValue.call());
@@ -92,9 +88,8 @@ contract("Snapshot", () => {
     const day2 = await snapshotTest.snapshotAt.call(
       latestTimestamp() + 2 * day
     );
-    const day3 = await snapshotTest.snapshotAt.call(
-      latestTimestamp() + 3 * day
-    );
+    await snapshotTest.snapshotAt.call(latestTimestamp() + 3 * day);
+
     await snapshotTest.setValue(100);
     await increaseTime(moment.duration({ days: 1 }));
     await snapshotTest.setValue(200);
@@ -110,6 +105,6 @@ contract("Snapshot", () => {
     const day1 = await snapshotTest.snapshotAt.call(
       latestTimestamp() + 1 * day
     );
-    await expectThrow(snapshotTest.getValueAt.call(day1, 41));
+    await expect(snapshotTest.getValueAt.call(day1, 41)).to.revert;
   });
 });

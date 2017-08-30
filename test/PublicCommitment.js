@@ -1,14 +1,10 @@
 import { expect } from "chai";
-import advanceToBlock from "./helpers/advanceToBlock";
-import EVMThrow from "./helpers/EVMThrow";
 import * as chain from "./helpers/spawnContracts";
 import { eventValue } from "./helpers/events";
-import { increaseTime, setTimeTo } from "./helpers/increaseTime";
-import { latestTime, latestTimestamp } from "./helpers/latestTime";
+import { setTimeTo } from "./helpers/increaseTime";
+import { latestTimestamp } from "./helpers/latestTime";
 
-const TestCommitment = artifacts.require("TestCommitment");
-
-contract("PublicCommitment", ([lockAdmin, investor, investor2]) => {
+contract("PublicCommitment", ([lockAdmin, investor]) => {
   let startTimestamp;
   const commitmentDuration = chain.months;
 

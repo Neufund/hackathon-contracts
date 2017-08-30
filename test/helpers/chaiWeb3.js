@@ -9,7 +9,6 @@ export default function(chai) {
 
       // I would love to hear ideas for better implementation
 
-      // eslint-disable-next-line no-underscore-dangle
       const web3ArrayAccessor = this._obj;
 
       // negative indexes seems to not play nicely with web3 so we skip this case
@@ -35,10 +34,25 @@ export default function(chai) {
       return;
     }
 
-    // eslint-disable-next-line no-underscore-dangle
     const object = this._obj;
 
     const usedGas = gasCost(object);
-    this.assert(usedGas >= gasLimit, "Used to much gas!");
+    this.assert(
+      usedGas <= gasLimit,
+      `Consumed gas ${usedGas} is more than ${gasLimit} limit.`
+    );
+  });
+
+  chai.Assertion.addProperty("revert", async function revert() {
+    try {
+      await this._obj;
+      this.assert(false, "Transaction did not revert.");
+    } catch (error) {
+      const invalidOpcode = error.message.search("invalid opcode") >= 0;
+      this.assert(
+        invalidOpcode,
+        "Transaction did not revert with the right error."
+      );
+    }
   });
 }

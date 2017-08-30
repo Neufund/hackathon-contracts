@@ -14,4 +14,6 @@ contract AccessRoles {
     bytes32 public constant ROLE_SNAPSHOT_CREATOR = keccak256("SnapshotCreator");
 
     bytes32 public constant ROLE_RECLAIMER = keccak256("Reclaimer");
+
+    bytes32 public constant ROLE_FORK_ARBITER = keccak256("ForkArbiter");
 }

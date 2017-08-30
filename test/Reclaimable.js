@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import createAccessPolicy from "./helpers/createAccessPolicy";
 import forceEther from "./helpers/forceEther";
-import expectThrow from "./helpers/expectThrow";
 
 const TestReclaimable = artifacts.require("TestReclaimable");
 const TestToken = artifacts.require("TestToken");
@@ -53,8 +52,10 @@ contract("Reclaimable", ([deployer, reclaimer, other]) => {
   it("should only allow ROLE_RECLAIMER to reclaim", async () => {
     const amount = web3.toWei(1, "ether");
     await forceEther(reclaimable.address, amount, deployer);
-    await expectThrow(reclaimable.reclaim(RECLAIM_ETHER, { from: other }));
-    await expectThrow(reclaimable.reclaim(RECLAIM_ETHER, { from: deployer }));
-    await reclaimable.reclaim(RECLAIM_ETHER, { from: reclaimer });
+    await expect(reclaimable.reclaim(RECLAIM_ETHER, { from: other })).to.revert;
+    await expect(reclaimable.reclaim(RECLAIM_ETHER, { from: deployer })).to
+      .revert;
+    await expect(reclaimable.reclaim(RECLAIM_ETHER, { from: reclaimer })).to.not
+      .revert;
   });
 });

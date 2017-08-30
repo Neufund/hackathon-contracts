@@ -2,20 +2,14 @@ import { expect } from "chai";
 import { last } from "lodash";
 import EvmError from "./helpers/EVMThrow";
 import { sequence } from "./helpers/promiseUtils";
-import {
-  closeFutureDate,
-  furtherFutureDate,
-  HOUR,
-  MONTH
-} from "./helpers/latestTime";
+import { closeFutureDate, HOUR, MONTH } from "./helpers/latestTime";
 import { setTimeTo } from "./helpers/increaseTime";
-import { etherToWei, shanToWei } from "./helpers/unitConverter";
+import { etherToWei } from "./helpers/unitConverter";
 import deployAllContracts from "./helpers/deploy";
 import {
   curveInEther,
   deployMutableCurve,
-  ethToEur,
-  eurUlpToEth
+  ethToEur
 } from "./helpers/verification";
 
 contract(
@@ -62,7 +56,7 @@ contract(
       });
 
       it("should not be possible to set it twice", async () => {
-        const { commitment, curve } = await deployAllContracts(
+        const { commitment } = await deployAllContracts(
           lockAdminAccount,
           whitelistAdminAccount
         );
@@ -83,8 +77,7 @@ contract(
       it("should not be possible to set it after commitment is started", async () => {
         const startingDate = closeFutureDate();
         const {
-          commitment,
-          curve
+          commitment
         } = await deployAllContracts(lockAdminAccount, whitelistAdminAccount, {
           commitmentCfg: { startTimestamp: startingDate }
         });
@@ -101,7 +94,7 @@ contract(
       });
 
       it("should not be possible to set it with not matching input", async () => {
-        const { commitment, curve } = await deployAllContracts(
+        const { commitment } = await deployAllContracts(
           lockAdminAccount,
           whitelistAdminAccount
         );
@@ -163,8 +156,7 @@ contract(
       it("should not be possible to set it after commitment is started", async () => {
         const startingDate = closeFutureDate();
         const {
-          commitment,
-          curve
+          commitment
         } = await deployAllContracts(lockAdminAccount, whitelistAdminAccount, {
           commitmentCfg: { startTimestamp: startingDate }
         });
@@ -546,9 +538,9 @@ contract(
           expectedNeumarkAmountForDeclaredTicket
         );
         await setTimeTo(startingDate);
-        for (let idx = 0; idx < actualInvestorTickets.length; idx++) {
+        for (const ticket of actualInvestorTickets) {
           await commitment.commit({
-            value: actualInvestorTickets[idx],
+            value: ticket,
             from: investor
           });
         }
@@ -621,8 +613,7 @@ contract(
         const ticketSize = etherToWei(1.5);
 
         const {
-          commitment,
-          lockedAccount
+          commitment
         } = await deployAllContracts(lockAdminAccount, whitelistAdminAccount, {
           commitmentCfg: {
             whitelistedInvestors,
@@ -643,8 +634,7 @@ contract(
         const ticketSize = etherToWei(1.5);
 
         const {
-          commitment,
-          lockedAccount
+          commitment
         } = await deployAllContracts(lockAdminAccount, whitelistAdminAccount, {
           commitmentCfg: {
             whitelistedInvestors,
@@ -665,13 +655,11 @@ contract(
         const ticketSize = etherToWei(1.5);
 
         const {
-          commitment,
-          lockedAccount
+          commitment
         } = await deployAllContracts(lockAdminAccount, whitelistAdminAccount, {
           commitmentCfg: {
             whitelistedInvestors,
             duration,
-            startTimestamp: startingDate,
             startTimestamp: startingDate
           }
         });
@@ -702,7 +690,6 @@ contract(
           commitmentCfg: {
             whitelistedInvestors,
             duration,
-            startTimestamp: startingDate,
             startTimestamp: startingDate
           }
         });
@@ -753,20 +740,15 @@ contract(
     async function shouldBurnUnusedNeumarks(minAbsCap) {
       const startingDate = closeFutureDate();
       const duration = MONTH;
-      const mutableCurve = await deployMutableCurve();
       const investor1 = accounts[0];
       const fixedInvestors = [investor1, accounts[1]];
       const fixedDeclaredTickets = [etherToWei(1), etherToWei(3)];
       const expectedTicketsSum = fixedDeclaredTickets[0].add(
         fixedDeclaredTickets[1]
       );
-      const expectedNeumarkAmmountOnFixedRate = await mutableCurve.issueInEth(
-        expectedTicketsSum
-      );
 
       const {
         commitment,
-        lockedAccount,
         neumark
       } = await deployAllContracts(lockAdminAccount, whitelistAdminAccount, {
         commitmentCfg: {
@@ -809,10 +791,6 @@ contract(
       const mutableCurve = await deployMutableCurve();
       const equalShareSize = investorDeclaration[0];
       const curveShareSize = firstInvestorTicket.sub(equalShareSize);
-      const expectedTicketsSum = investorDeclaration.reduce(
-        (a, x) => a.add(x),
-        new web3.BigNumber(0)
-      );
       const expectedNeumarkAmmountIssuance = [
         ...(await sequence(investorDeclaration, mutableCurve.issueInEth)),
         await mutableCurve.issueInEth(curveShareSize)

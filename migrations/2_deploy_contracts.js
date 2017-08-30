@@ -1,11 +1,12 @@
 require("babel-register");
 
+const RoleBasedAccessControl = artifacts.require("RoleBasedAccessControl");
+const AccessRoles = artifacts.require("AccessRoles");
+const EthereumForkArbiter = artifacts.require("EthereumForkArbiter");
 const Neumark = artifacts.require("Neumark");
 const LockedAccount = artifacts.require("LockedAccount");
 const EtherToken = artifacts.require("EtherToken");
 const PublicCommitment = artifacts.require("PublicCommitment");
-const RoleBasedAccessControl = artifacts.require("RoleBasedAccessControl");
-const AccessRoles = artifacts.require("AccessRoles");
 
 // Needs to match contracts/AccessControl/RoleBasedAccessControl.sol:TriState
 const TriState = { Unset: 0, Allow: 1, Deny: 2 };
@@ -27,6 +28,8 @@ module.exports = function deployContracts(deployer, network, accounts) {
     console.log("AccessControl deployment...");
     await deployer.deploy(RoleBasedAccessControl);
     const accessControl = await RoleBasedAccessControl.deployed();
+    console.log("EthereumForkArbiter deployment...");
+    await deployer.deploy(EthereumForkArbiter, accessControl.address);
     console.log("Neumark deploying...");
     await deployer.deploy(Neumark, accessControl.address);
     const neumark = await Neumark.deployed();

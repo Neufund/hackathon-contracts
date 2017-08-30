@@ -1,5 +1,14 @@
 # ICO contracts
 
+## Running locally
+```
+yarn          # installs all dependencies
+yarn testrpc  # run testnet
+
+# open new terminal window
+yarn deploy
+```
+
 ## Developing
 ```
 yarn testrpc # run test net

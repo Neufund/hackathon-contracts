@@ -8,7 +8,6 @@ export default function(chai) {
     invariant(ether, "missing ether parameter");
     invariant(neumarks, "missing neumarks parameter");
 
-    // eslint-disable-next-line no-underscore-dangle
     const balance = this._obj;
 
     chai

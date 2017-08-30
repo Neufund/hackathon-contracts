@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import { TriState, EVERYONE, GLOBAL } from "./triState";
 
 const RoleBasedAccessControl = artifacts.require(

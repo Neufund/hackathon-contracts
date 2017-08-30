@@ -36,11 +36,9 @@
   },
   "scripts": {
     "lint": "yarn lint:solium && yarn lint:eslint",
-    "lint:fix": "yarn format",
+    "lint:fix": "eslint --fix --ignore-path .gitignore .",
     "lint:eslint": "eslint --ignore-path .gitignore .",
-    "lint:prettier": "prettier --list-different \"{,!(node_modules|coverage)/**/}*.js\"",
     "lint:solium": "solium --dir contracts --reporter=pretty",
-    "format": "eslint --ignore-path .gitignore . --fix",
     "testrpc": "./scripts/testrpc.sh",
     "test": "truffle compile && truffle test",
     "test:coverage": "SKIP_GAS_CHECKS=true solidity-coverage && codecov",

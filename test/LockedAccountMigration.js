@@ -1,10 +1,7 @@
 import { expect } from "chai";
-import moment from "moment";
-import error from "./helpers/error";
 import { hasEvent, eventValue } from "./helpers/events";
 import * as chain from "./helpers/spawnContracts";
-import increaseTime, { setTimeTo } from "./helpers/increaseTime";
-import latestTime, { latestTimestamp } from "./helpers/latestTime";
+import { latestTimestamp } from "./helpers/latestTime";
 import EvmError from "./helpers/EVMThrow";
 
 const TestLockedAccountMigrationTarget = artifacts.require(
@@ -71,12 +68,12 @@ contract("TestLockedAccountMigrationTarget", ([admin, investor, investor2]) => {
     await migrationTarget.setMigrationSource(chain.lockedAccount.address, {
       from: admin
     });
-    let tx = await chain.lockedAccount.enableMigration(
-      migrationTarget.address,
-      { from: admin }
-    );
+    await chain.lockedAccount.enableMigration(migrationTarget.address, {
+      from: admin
+    });
+
     await migrationTarget.setShouldMigrationFail(true, { from: admin });
-    tx = await expect(
+    await expect(
       chain.lockedAccount.migrate({ from: investor })
     ).to.be.rejectedWith(EvmError);
   });

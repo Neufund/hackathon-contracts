@@ -1,7 +1,7 @@
 import invariant from "invariant";
 import { MONTH, closeFutureDate } from "./latestTime";
 import { etherToWei } from "./unitConverter";
-import { TriState, EVERYONE } from "./triState.js";
+import { TriState, EVERYONE } from "./triState";
 
 const LockedAccount = artifacts.require("LockedAccount");
 const EtherToken = artifacts.require("EtherToken");

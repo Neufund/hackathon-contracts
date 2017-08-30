@@ -9,8 +9,6 @@ cache: yarn
 install:
   - yarn
 script:
-  - yarn lint:prettier
   - yarn lint:solium; true
-  - yarn lint:eslint; true
-  - yarn testrpc > /dev/null &
+  - yarn lint:eslint
   - yarn test:coverage

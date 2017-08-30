@@ -4,14 +4,11 @@ import { TriState, EVERYONE } from "./triState";
 
 const RoleBasedAccessControl = artifacts.require("RoleBasedAccessControl");
 const AccessRoles = artifacts.require("AccessRoles");
-const LockedAccount = artifacts.require("LockedAccount");
-const EtherToken = artifacts.require("EtherToken");
 const Neumark = artifacts.require("Neumark");
 
 async function deployNeumark() {
   const rbac = await RoleBasedAccessControl.new();
   const roles = await AccessRoles.new();
-  const etherToken = await EtherToken.new(rbac.address);
   const neumark = await Neumark.new(rbac.address);
 
   // TODO: more specific rights
