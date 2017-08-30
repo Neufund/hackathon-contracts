@@ -9,10 +9,18 @@ contract TestCommitment is PublicCommitment {
 
     function _succ() {
         lockedAccount.controllerSucceeded();
+        finalized = true;
+    }
+
+    function _succWithLockRelease() {
+        // do not call lockedAccount just finalize
+        // this will allow another controller to overtake lock
+        finalized = true;
     }
 
     function _fail() {
         lockedAccount.controllerFailed();
+        finalized = true;
     }
 
     // a test function to change start date of ICO - may be useful for UI demo
