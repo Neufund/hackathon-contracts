@@ -15,7 +15,7 @@ import './Reclaimable.sol';
 
 contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErrors, Math, IsContract, IERC667Callback, Reclaimable {
     // lock state
-    enum LockState {Uncontrolled, AcceptingLocks, AcceptingUnlocks, ReleaseAll }
+    enum LockState { Uncontrolled, AcceptingLocks, AcceptingUnlocks, ReleaseAll }
 
     // events
     event FundsLocked(address indexed investor, uint256 amount, uint256 neumarks);
@@ -117,6 +117,7 @@ contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErro
                 neumark.burnNeumark(a.neumarksDue);
                 // take the penalty if before unlockDate
                 if (currentTime() < a.unlockDate) {
+                    require(penaltyDisbursalAddress != address(0));
                     uint256 penalty = fraction(a.balance, penaltyFraction);
                     // distribute penalty
                     if (isContract(penaltyDisbursalAddress)) {
@@ -160,7 +161,9 @@ contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErro
         // only from neumarks
         require(_token == address(neumark));
         // this will check if allowance was made and if _amount is enough to unlock
-        unlockFor(from);
+        require(unlockFor(from) == Status.SUCCESS);
+        // we assume external call so return value will be lost to clients
+        // that's why we throw above
         return true;
     }
 
@@ -230,8 +233,9 @@ contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErro
         public
     {
         // do not let change controller that didn't yet finished
-        if (address(controller) != 0)
+        if (address(controller) != 0) {
             require(controller.isFinalized());
+        }
         controller = _controller;
         _changeState(LockState.AcceptingLocks);
     }
@@ -243,7 +247,8 @@ contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErro
         only(ROLE_LOCKED_ACCOUNT_ADMIN)
         public
     {
-        // can be changed at any moment by owner
+        require(_penaltyDisbursalAddress != address(0));
+        // can be changed at any moment by admin
         penaltyDisbursalAddress = _penaltyDisbursalAddress;
     }
 
@@ -289,9 +294,15 @@ contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErro
         public
         returns (bool)
     {
-        // This contract holds the asset token
-        require(token != assetToken);
-        return Reclaimable.reclaim(token);
+        // check ether or token balance
+        uint256 amount =
+            token == RECLAIM_ETHER ? this.balance : token.balanceOf(this);
+        // This contract holds the asset token and manages totalLockedAmount balance
+        // anything above that can be reclaimed
+        if (token == assetToken) {
+            amount -= totalLockedAmount;
+        }
+        return Reclaimable.reclaimAmount(token, amount);
     }
 
 }

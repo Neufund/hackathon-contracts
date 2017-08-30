@@ -68,9 +68,15 @@ contract EtherToken is AccessControlled, StandardToken, ITokenWithDeposit, Recla
         public
         returns (bool)
     {
-        // This contract holds Ether
-        require(token != RECLAIM_ETHER);
-        return Reclaimable.reclaim(token);
+        // check ether or token balance
+        uint256 amount =
+            token == RECLAIM_ETHER ? this.balance : token.balanceOf(this);
+        // This contract holds ether in its ethereum balance and manages ehter token amount via totalSupply
+        // anything above that can be reclaimed
+        if (token == RECLAIM_ETHER) {
+            amount -= this.totalSupply();
+        }
+        return Reclaimable.reclaimAmount(token, amount);
     }
 
 
