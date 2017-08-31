@@ -162,13 +162,8 @@ contract CommitmentBase is AccessControlled, TimeSource, Math, ITokenOffering, R
     {
         // distribute half half
         uint256 investorNeumarks = divRound(neumarks, neumarkRewardPlatformOperatorDivisor);
-        // @ remco is there a better way to distribute?
-        bool isEnabled = neumark.transferEnabled();
-        if (!isEnabled)
-            neumark.enableTransfer(true);
         require(neumark.transfer(investor, investorNeumarks));
         require(neumark.transfer(platformOperatorWallet, neumarks - investorNeumarks));
-        neumark.enableTransfer(isEnabled);
         return investorNeumarks;
     }
 

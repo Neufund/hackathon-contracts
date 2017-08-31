@@ -19,7 +19,7 @@ contract("Neumark", accounts => {
 
   beforeEach(async () => {
     rbac = await createAccessPolicy([
-      { subject: accounts[0], role: roles.transferAdmin },
+      { role: roles.neumarkTrader },
       { subject: accounts[0], role: roles.neumarkIssuer },
       { subject: accounts[1], role: roles.neumarkIssuer },
       { subject: accounts[2], role: roles.neumarkIssuer },

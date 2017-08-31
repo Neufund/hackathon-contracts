@@ -1,6 +1,7 @@
 pragma solidity 0.4.15;
 
 import "./CommitmentBase.sol";
+import "../AccessControl/RoleBasedAccessControl.sol";
 
 /// public capital commitment for general public
 contract PublicCommitment is CommitmentBase {
@@ -13,6 +14,13 @@ contract PublicCommitment is CommitmentBase {
     {
         // enable Neumark trading in token controller
         neumark.enableTransfer(true);
+        RoleBasedAccessControl(neumark.accessPolicy()).setUserRole(
+            RoleBasedAccessControl.EVERYONE,
+            ROLE_NEUMARK_TRADER,
+            neumark,
+            RoleBasedAccessControl.TriState.Allow
+        );
+
         // enable escape hatch and end locking funds phase
         lockedAccount.controllerSucceeded();
     }

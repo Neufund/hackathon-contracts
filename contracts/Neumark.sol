@@ -20,7 +20,6 @@ contract Neumark is
     uint8  constant TOKEN_DECIMALS = 18;
     string constant TOKEN_SYMBOL   = "NMK";
 
-    bool public transferEnabled;
     uint256 public totalEuroUlps;
 
     event NeumarksIssued(
@@ -49,7 +48,6 @@ contract Neumark is
         NeumarkIssuanceCurve()
         Reclaimable()
     {
-        transferEnabled = false;
         totalEuroUlps = 0;
     }
 
@@ -88,13 +86,6 @@ contract Neumark is
         return euroUlps;
     }
 
-    function enableTransfer(bool enabled)
-        public
-        only(ROLE_TRANSFER_ADMIN)
-    {
-        transferEnabled = enabled;
-    }
-
     function createSnapshot()
         public
         only(ROLE_SNAPSHOT_CREATOR)
@@ -115,11 +106,12 @@ contract Neumark is
         uint amount
     )
         internal
+        only(ROLE_NEUMARK_TRADER)
         acceptAgreement(from)
         acceptAgreement(to)
         returns (bool allow)
     {
-        return transferEnabled;
+        return true;
     }
 
     /// @notice Notifies the controller about an approval allowing the
