@@ -20,7 +20,7 @@ contract EtherToken is AccessControlled, StandardToken, ITokenWithDeposit, Recla
     function EtherToken(IAccessPolicy accessPolicy)
         AccessControlled(accessPolicy)
         StandardToken()
-        Reclaimable()
+        Reclaimable([RECLAIM_ETHER])
     {
     }
 
@@ -63,16 +63,4 @@ contract EtherToken is AccessControlled, StandardToken, ITokenWithDeposit, Recla
         assert(msg.sender.send(amount));
         Withdrawal(msg.sender, amount);
     }
-
-    function reclaim(IBasicToken token)
-        public
-        returns (bool)
-    {
-        // This contract holds Ether
-        require(token != RECLAIM_ETHER);
-        return Reclaimable.reclaim(token);
-    }
-
-
-
 }

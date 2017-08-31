@@ -42,7 +42,7 @@ contract Neumark is
             TOKEN_SYMBOL
         )
         NeumarkIssuanceCurve()
-        Reclaimable()
+        Reclaimable([])
     {
         transferEnabled = false;
         totalEuroUlps = 0;

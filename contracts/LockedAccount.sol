@@ -252,7 +252,7 @@ contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErro
     function LockedAccount(IAccessPolicy _policy, IERC667Token _assetToken, Neumark _neumark,
         uint _lockPeriod, uint _penaltyFraction)
         AccessControlled(_policy)
-        Reclaimable()
+        Reclaimable([_assetToken])
     {
         assetToken = _assetToken;
         neumark = _neumark;
@@ -283,15 +283,6 @@ contract LockedAccount is AccessControlled, AccessRoles, TimeSource, ReturnsErro
             LockStateTransition(lockState, newState);
             lockState = newState;
         }
-    }
-
-    function reclaim(IBasicToken token)
-        public
-        returns (bool)
-    {
-        // This contract holds the asset token
-        require(token != assetToken);
-        return Reclaimable.reclaim(token);
     }
 
 }

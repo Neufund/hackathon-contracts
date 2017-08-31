@@ -10,7 +10,7 @@ contract TestReclaimable is
 
     function TestReclaimable(IAccessPolicy accessPolicy)
         AccessControlled(accessPolicy)
-        Reclaimable()
+        Reclaimable([])
     {
     }
 }

@@ -198,7 +198,7 @@ contract CommitmentBase is AccessControlled, TimeSource, Math, ITokenOffering, R
         Neumark _neumark
     )
         AccessControlled(accessPolicy)
-        Reclaimable()
+        Reclaimable([])
     {
         require(address(_ethToken) == address(_lockedAccount.assetToken()));
         lockedAccount = _lockedAccount;

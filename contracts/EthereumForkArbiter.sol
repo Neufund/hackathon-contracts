@@ -25,7 +25,7 @@ contract EthereumForkArbiter is AccessControlled, AccessRoles, Reclaimable {
 
     function EthereumForkArbiter(IAccessPolicy accessPolicy)
         AccessControlled(accessPolicy)
-        Reclaimable()
+        Reclaimable([])
     {
     }
 
