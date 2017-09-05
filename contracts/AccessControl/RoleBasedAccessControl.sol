@@ -104,17 +104,17 @@ contract RoleBasedAccessControl is
         bool allow = false;
         TriState value = TriState.Unset;
 
-        // Cascade local, global, everyone local, everyone global
+        // Cascade local, everyone local, global, everyone global
         value = access[subject][role][object];
         set = value != TriState.Unset;
         allow = value == TriState.Allow;
         if (!set) {
-            value = access[subject][role][GLOBAL];
+            value = access[EVERYONE][role][object];
             set = value != TriState.Unset;
             allow = value == TriState.Allow;
         }
         if (!set) {
-            value = access[EVERYONE][role][object];
+            value = access[subject][role][GLOBAL];
             set = value != TriState.Unset;
             allow = value == TriState.Allow;
         }
