@@ -151,18 +151,22 @@ contract CommitmentBase is
         // get neumarks
         uint256 neumarks = giveNeumarks(msg.sender, msg.value);
 
-        //send Money to ETH-T contract
+        // send Money to ETH-T contract
         PAYMENT_TOKEN.deposit.value(msg.value)(address(this), msg.value);
 
         // make allowance for lock
-        PAYMENT_TOKEN.approve(address(LOCKED_ACCOUNT), msg.value);
-
-        // lock in lock
-        LOCKED_ACCOUNT.lock(msg.sender, msg.value, neumarks);
+        PAYMENT_TOKEN.transfer(LOCKED_ACCOUNT, msg.value, bytes(msg.sender));
 
         // convert weis into euro
         uint256 euroUlps = convertToEUR(msg.value);
-        FundsInvested(msg.sender, msg.value, PAYMENT_TOKEN, euroUlps, neumarks, NEUMARK);
+        LogFundsInvested(
+            msg.sender,
+            msg.value,
+            PAYMENT_TOKEN,
+            euroUlps,
+            neumarks,
+            NEUMARK
+        );
     }
 
     /// when commitment end criteria are met ANYONE can finalize

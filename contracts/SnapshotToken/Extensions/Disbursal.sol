@@ -3,7 +3,7 @@ pragma solidity 0.4.15;
 import '../../Standards/ISnapshotableToken.sol';
 import '../../Standards/IBasicToken.sol';
 import '../../Standards/IERC20Token.sol';
-import '../../Standards/IERC677Callback.sol';
+import '../../Standards/IERC223Callback.sol';
 
 
 // TODO: Anyone can create a token and disburse it, but then everyone
@@ -11,7 +11,7 @@ import '../../Standards/IERC677Callback.sol';
 //       these mallicious disbursals. Some solution strategies:
 //        * Limit the people who can disburse to a trusted set
 //        * Allow claims in any order
-contract Disbursal is IERC677Callback {
+contract Disbursal is IERC223Callback {
 
     ////////////////////////
     // Types
@@ -172,40 +172,6 @@ contract Disbursal is IERC677Callback {
         Claimed(beneficiary, index, token, amount);
     }
 
-    function disburseAllowance(IERC20Token token)
-        public
-    {
-        uint256 amount = token.allowance(msg.sender, this);
-        disburseAllowance(token, msg.sender, amount);
-    }
-
-    function disburseAllowance(IERC20Token token, address from, uint256 amount)
-        public
-    {
-        // Transfer all allowed tokens to self.
-        require(amount < 2**128);
-        bool success = token.transferFrom(from, this, amount);
-        require(success);
-
-        // Disburse these tokens
-        disburse(IBasicToken(token), amount);
-    }
-
-    // IERC677Callback receiver
-    function receiveApproval(
-        address from,
-        uint256 amount,
-        address token,
-        bytes data
-    )
-        public
-        returns (bool)
-    {
-        require(msg.sender == token);
-        require(data.length == 0);
-        disburseAllowance(IERC20Token(token), from, amount);
-    }
-
     function shareToken()
         public
         constant
@@ -214,7 +180,22 @@ contract Disbursal is IERC677Callback {
         return SHARE_TOKEN;
     }
 
-    // TODO: ERC223 style receiver
+
+    //
+    // Implements IERC223Callback
+    //
+
+    function tokenFallback(
+        address from,
+        uint256 amount,
+        bytes data
+    )
+        public
+        returns (bool)
+    {
+        require(data.length == 0);
+        disburse(IBasicToken(msg.sender), amount);
+    }
 
     ////////////////////////
     // Internal functions
@@ -228,12 +209,9 @@ contract Disbursal is IERC677Callback {
     function disburse(IBasicToken token, uint256 amount)
         internal
     {
-        // Transfer all allowed tokens to self.
         require(amount > 0);
         require(amount < 2**128);
-
-        // Verify our balance
-        // TODO: we need to check for newly received tokens!
+        require(token.balanceOf(this) >= amount);
 
         // Create snapshot
         uint256 snapshot = SHARE_TOKEN.createSnapshot();

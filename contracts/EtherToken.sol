@@ -3,6 +3,8 @@ pragma solidity 0.4.15;
 import './AccessControl/AccessControlled.sol';
 import './Math.sol';
 import './Reclaimable.sol';
+import './Standards/IERC223Token.sol';
+import './Standards/IERC223Callback.sol';
 import './Standards/IERC677Token.sol';
 import './Standards/IERC677Callback.sol';
 import './Standards/ITokenWithDeposit.sol';
@@ -12,6 +14,7 @@ import './Zeppelin/StandardToken.sol';
 
 contract EtherToken is
     ITokenWithDeposit,
+    IERC223Token,
     IERC677Token,
     AccessControlled,
     StandardToken,
@@ -67,6 +70,26 @@ contract EtherToken is
         _totalSupply -= amount;
         msg.sender.transfer(amount);
         Withdrawal(msg.sender, amount);
+    }
+
+    //
+    // Implements IERC677Token
+    //
+
+    function transfer(address to, uint256 amount, bytes data)
+        public
+        returns (bool success)
+    {
+        success = transfer(msg.sender, to, amount);
+        if (!success) {
+            return success;
+        }
+
+        // Notify the receiving contract.
+        if (isContract(to)) {
+            IERC223Callback(to).tokenFallback(msg.sender, amount, data);
+        }
+        return success;
     }
 
     //
