@@ -27,6 +27,9 @@ contract AccessRoles {
     // represents legally platform operator in case of forks and contracts with legal agreement attached. keccak256("PlatformOperatorRepresentative")
     bytes32 internal constant ROLE_PLATFORM_OPERATOR_REPRESENTATIVE = 0xb2b321377653f655206f71514ff9f150d0822d062a5abcf220d549e1da7999f0;
 
+    // Can start a migration process on migratable contracts
+    bytes32 internal constant ROLE_MIGRATION_ADMIN = 0x851dbd8dbf964ea981407c481c2ca62bfc367f171480f0d9b42efd0ba613139e;
+
     // allows to deposit EUR-T and allow addresses to send and receive EUR-T. keccak256("EurtDepositManager")
-    bytes32 internal constant ROLE_EURT_DEPOSIT_MANAGER =0x7c8ecdcba80ce87848d16ad77ef57cc196c208fc95c5638e4a48c681a34d4fe7;
+    bytes32 internal constant ROLE_EURT_DEPOSIT_MANAGER = 0x7c8ecdcba80ce87848d16ad77ef57cc196c208fc95c5638e4a48c681a34d4fe7;
 }

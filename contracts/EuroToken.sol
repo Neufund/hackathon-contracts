@@ -86,7 +86,7 @@ contract EuroToken is
         AccessControlled(accessPolicy)
         StandardToken()
         TokenMetadata(NAME, DECIMALS, SYMBOL, "")
-        MigrationSource(accessPolicy, ROLE_EURT_DEPOSIT_MANAGER)
+        MigrationSource(accessPolicy)
         Reclaimable()
     {
     }

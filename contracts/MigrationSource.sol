@@ -2,21 +2,16 @@ pragma solidity 0.4.15;
 
 import './Standards/IMigrationSource.sol';
 import './AccessControl/AccessControlled.sol';
+import './AccessRoles.sol';
 
 
 /// @notice mixin that enables migration pattern for a contract
 /// @dev when derived from
 contract MigrationSource is
     IMigrationSource,
-    AccessControlled
+    AccessControlled,
+    AccessRoles
 {
-    ////////////////////////
-    // Immutable state
-    ////////////////////////
-
-    /// stores role hash that can enable migration
-    bytes32 private MIGRATION_ADMIN;
-
     ////////////////////////
     // Mutable state
     ////////////////////////
@@ -45,12 +40,10 @@ contract MigrationSource is
     ////////////////////////
 
     function MigrationSource(
-        IAccessPolicy policy,
-        bytes32 migrationAdminRole
+        IAccessPolicy policy
     )
         AccessControlled(policy)
     {
-        MIGRATION_ADMIN = migrationAdminRole;
     }
 
     ////////////////////////
@@ -67,8 +60,8 @@ contract MigrationSource is
     /// @dev do not forget to add accessor modifier in override
     function enableMigration(IMigrationTarget migration)
         public
+        only(ROLE_MIGRATION_ADMIN)
         onlyMigrationEnabledOnce()
-        only(MIGRATION_ADMIN)
     {
         // we must be the source
         require(migration.currentMigrationSource() == address(this));
