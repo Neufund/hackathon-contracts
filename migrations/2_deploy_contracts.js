@@ -92,7 +92,7 @@ module.exports = function deployContracts(deployer, network, accounts) {
     );
     const commitment = await Commitment.deployed();
 
-    console.log("Seting permissions");
+    console.log("Setting permissions");
     await accessControl.setUserRole(
       commitment.address,
       web3.sha3("NeumarkIssuer"),
@@ -118,17 +118,17 @@ module.exports = function deployContracts(deployer, network, accounts) {
       TriState.Allow
     );
     await accessControl.setUserRole(
+      commitment.address,
+      web3.sha3("Transferer"),
+      neumark.address,
+      TriState.Allow
+    );
+    await accessControl.setUserRole(
       lockedAccountAdmin,
       web3.sha3("LockedAccountAdmin"),
       GLOBAL,
       TriState.Allow
     );
-    await etherLock.setController(commitment.address, {
-      from: lockedAccountAdmin
-    });
-    await euroLock.setController(commitment.address, {
-      from: lockedAccountAdmin
-    });
     await accessControl.setUserRole(
       whitelistAdmin,
       web3.sha3("WhitelistAdmin"),
@@ -138,9 +138,15 @@ module.exports = function deployContracts(deployer, network, accounts) {
     await accessControl.setUserRole(
       platformOperatorRepresentative,
       web3.sha3("PlatformOperatorRepresentative"),
-      neumark.address,
+      GLOBAL,
       TriState.Allow
     );
+    await etherLock.setController(commitment.address, {
+      from: lockedAccountAdmin
+    });
+    await euroLock.setController(commitment.address, {
+      from: lockedAccountAdmin
+    });
     console.log("Amending agreements");
     await neumark.amendAgreement(
       "ipfs:QmPXME1oRtoT627YKaDPDQ3PwA8tdP9rWuAAweLzqSwAWT",
