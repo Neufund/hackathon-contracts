@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /**
  * Simple script to get address from ledger using different derivation paths
- * usage: yarn ledger "44'/60'/0'/1" if you leave it empty you will get default path
+ * usage: yarn ledgeraddresss "44'/60'/0'/1" if you leave it empty you will get default path
  */
 // eslint-disable-next-line import/no-extraneous-dependencies
 const ledger = require("ledgerco");
@@ -18,5 +18,5 @@ ledger.comm_node.create_async(TIMEOUT).then(comm => {
   return eth.getAddress_async(path).then(result => {
     console.log(result);
     comm.close_async();
-  });
-});
+  }).catch(err => console.log(err));
+}).catch(err => console.log(err));
